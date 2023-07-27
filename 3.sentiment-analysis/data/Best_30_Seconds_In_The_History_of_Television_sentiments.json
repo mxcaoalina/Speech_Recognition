@@ -1,0 +1,74 @@
+[
+    {
+        "text": "Would you speak to the people who believe it is a worthwhile vaccine and it is saving lives?",
+        "start": 170,
+        "end": 5102,
+        "sentiment": "NEUTRAL",
+        "confidence": 0.6234111785888672,
+        "speaker": null
+    },
+    {
+        "text": "Are they just dead wrong?",
+        "start": 5156,
+        "end": 6302,
+        "sentiment": "NEGATIVE",
+        "confidence": 0.7600935101509094,
+        "speaker": null
+    },
+    {
+        "text": "Have they been fed a line from the federal government?",
+        "start": 6356,
+        "end": 9520,
+        "sentiment": "NEUTRAL",
+        "confidence": 0.7179419994354248,
+        "speaker": null
+    },
+    {
+        "text": "Tim, I appreciate the opportunity to speak to the people that went ahead and got the Jab.",
+        "start": 9970,
+        "end": 13818,
+        "sentiment": "POSITIVE",
+        "confidence": 0.9024941325187683,
+        "speaker": null
+    },
+    {
+        "text": "I speak their language.",
+        "start": 13914,
+        "end": 15034,
+        "sentiment": "NEUTRAL",
+        "confidence": 0.7533385157585144,
+        "speaker": null
+    },
+    {
+        "text": "I would speak to them thusly.",
+        "start": 15082,
+        "end": 16750,
+        "sentiment": "NEUTRAL",
+        "confidence": 0.8875871896743774,
+        "speaker": null
+    },
+    {
+        "text": "They understand that well.",
+        "start": 21810,
+        "end": 24542,
+        "sentiment": "NEUTRAL",
+        "confidence": 0.7201396226882935,
+        "speaker": null
+    },
+    {
+        "text": "So all these millions of people that got the shots, they're just stupid?",
+        "start": 24676,
+        "end": 28230,
+        "sentiment": "NEGATIVE",
+        "confidence": 0.9198828935623169,
+        "speaker": null
+    },
+    {
+        "text": "Yes.",
+        "start": 28730,
+        "end": 28980,
+        "sentiment": "POSITIVE",
+        "confidence": 0.4610389769077301,
+        "speaker": null
+    }
+]
