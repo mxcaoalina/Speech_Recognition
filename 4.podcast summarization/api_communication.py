@@ -1,86 +1,91 @@
 import requests
-from api_secret import API_KEY_ASSEMBLYAI
-import time
 import json
-
-#upload
-upload_endpoint = "https://api.assemblyai.com/v2/upload"
-transcript_endpoint = "https://api.assemblyai.com/v2/transcript"
-
-headers = {
-    'authorization' : API_KEY_ASSEMBLYAI,
-    'content-type': "application/json"
-} 
-
-def upload(filename):
-    def read_file(filename, chunk_size=5242880):
-        with open(filename, 'rb') as _file:
-            while True:
-                data = _file.read(chunk_size)
-                if not data:
-                    break
-                yield data
-
-    
-    upload_response = requests.post(upload_endpoint,
-                            headers=headers,
-                            data=read_file(filename))
-
-    audio_url = upload_response.json()['upload_url']
-    return audio_url
+import time
+from api_secret import API_KEY_ASSEMBLYAI, API_KEY_LISTENNOTES
+import pprint
 
 
+transcript_endpoint = 'https://api.assemblyai.com/v2/transcript'
+headers_assemblyai = {
+    "authorization": API_KEY_ASSEMBLYAI,
+    "content-type": "application/json"
+}
 
-# transcribe
-def transcribe(audio_url, sentiment_analysis):
+listennotes_episode_endpoint = 'https://listen-api.listennotes.com/api/v2/episodes'
+headers_listennotes = {
+  'X-ListenAPI-Key': API_KEY_LISTENNOTES,
+}
+
+
+def get_episode_audio_url(episode_id):
+    url = listennotes_episode_endpoint + '/' + episode_id
+    response = requests.request('GET', url, headers=headers_listennotes)
+
+    data = response.json()
+    # pprint.pprint(data)
+
+    episode_title = data['title']
+    thumbnail = data['thumbnail']
+    podcast_title = data['podcast']['title']
+    audio_url = data['audio']
+    return audio_url, thumbnail, podcast_title, episode_title
+
+def transcribe(audio_url, auto_chapters):
     transcript_request = {
-        "audio_url": audio_url,
-        'sentiment_analysis': sentiment_analysis
-        }
-    
-    transcript_response = requests.post(transcript_endpoint, json=transcript_request, headers=headers)
-    job_id = transcript_response.json()['id']
-    return job_id
+        'audio_url': audio_url,
+        'auto_chapters': auto_chapters
+    }
+
+    transcript_response = requests.post(transcript_endpoint, json=transcript_request, headers=headers_assemblyai)
+    pprint.pprint(transcript_response.json())
+    return transcript_response.json()['id']
 
 
-
-# poll
 def poll(transcript_id):
     polling_endpoint = transcript_endpoint + '/' + transcript_id
-    polling_response = requests.get(polling_endpoint, headers=headers)
+    polling_response = requests.get(polling_endpoint, headers=headers_assemblyai)
     return polling_response.json()
+    
 
 
-def get_transcription_result_url(audio_url, sentiment_analysis):
-    transcript_id = transcribe(audio_url, sentiment_analysis)
-
+def get_transcription_result_url(url, auto_chapters):
+    transcribe_id = transcribe(url, auto_chapters)
     while True:
-        data = poll(transcript_id)
+        data = poll(transcribe_id)
         if data['status'] == 'completed':
             return data, None
         elif data['status'] == 'error':
             return data, data['error']
 
-        print('Waiting 30 seconds...')
-        time.sleep(30)
+        print("waiting for 60 seconds")
+        time.sleep(60)
+            
 
-
-
-# save transcript
-def save_transcript(audio_url, filename, sentiment_analysis=False):
-    data, error = get_transcription_result_url(audio_url, sentiment_analysis)
-
+def save_transcript(episode_id):
+    audio_url, thumbnail, podcast_title, episode_title = get_episode_audio_url(episode_id)
+    data, error = get_transcription_result_url(audio_url, auto_chapters=True)
+    
     if data:
-        text_filename = filename + ".txt"
-        with open(text_filename, "w") as f:
-            f.write(data["text"])
+        filename = episode_id + '.txt'
+        with open(filename, 'w') as f:
+            f.write(data['text'])
 
-        if sentiment_analysis:
-            text_filename = filename + "_sentiments.json"
-            with open(text_filename, "w") as f:
-                sentiments = data["sentiment_analysis_results"]
-                json.dump(sentiments, f, indent=4)
-        print('Transcription saved!')
+        filename = episode_id + '_chapters.json'
+        with open(filename, 'w') as f:
+            chapters = data['chapters']
 
+            data = {'chapters': chapters}
+            data['audio_url']=audio_url
+            data['thumbnail']=thumbnail
+            data['podcast_title']=podcast_title
+            data['episode_title']=episode_title
+            # for key, value in kwargs.items():
+            #     data[key] = value
+
+            json.dump(data, f, indent=4)
+            print('Transcript saved')
+            return True
+    
     elif error:
-        print("Error!!", error)
+        print("Error!!!", error)
+        return False
